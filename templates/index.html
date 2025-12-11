@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrapeTracker - Wine Catalog</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍇 GrapeTracker</h1>
+            <p class="subtitle">Your Personal Wine Catalog</p>
+        </header>
+
+        <main>
+            <div class="catalog-header">
+                <h2>My Wine Collection</h2>
+                <button class="add-btn" onclick="openModal()">+</button>
+            </div>
+
+            {% if wines %}
+            <div class="wine-grid">
+                {% for wine in wines %}
+                <div class="wine-card">
+                    <div class="wine-header">
+                        <h3>{{ wine.name }}</h3>
+                        <form action="{{ url_for('delete_wine', wine_id=wine.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this wine?')">×</button>
+                        </form>
+                    </div>
+                    <div class="wine-details">
+                        <div class="rating-row">
+                            <span class="label">Tannin Level:</span>
+                            <span class="rating">{{ wine.tannin_level }}/10</span>
+                        </div>
+                        <div class="rating-row">
+                            <span class="label">Sweetness:</span>
+                            <span class="rating">{{ wine.sweetness }}/10</span>
+                        </div>
+                        <div class="rating-row">
+                            <span class="label">Overall Appeal:</span>
+                            <span class="rating">{{ wine.overall_appeal }}/10</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="label">Price:</span>
+                            <span class="price">${{ "%.2f"|format(wine.price) }}</span>
+                        </div>
+                    </div>
+                    {% if wine.description %}
+                    <div class="wine-description">
+                        <p>{{ wine.description }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="wine-date">
+                        <small>Added: {{ wine.date_added.strftime('%B %d, %Y') }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No wines in your collection yet.</p>
+                <p>Click the <strong>+</strong> button to add your first wine review!</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <!-- Modal for adding new wine -->
+    <div id="addWineModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Wine Review</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form action="{{ url_for('add_wine') }}" method="POST" id="wineForm">
+                <div class="form-group">
+                    <label for="name">Wine Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="e.g., Chateau Margaux 2015">
+                </div>
+
+                <div class="form-group">
+                    <label for="tannin_level">Tannin Level * (1-10)</label>
+                    <input type="range" id="tannin_level" name="tannin_level" min="1" max="10" value="5" oninput="updateTanninValue(this.value)">
+                    <span class="range-value" id="tanninValue">5</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="sweetness">Sweetness * (1-10)</label>
+                    <input type="range" id="sweetness" name="sweetness" min="1" max="10" value="5" oninput="updateSweetnessValue(this.value)">
+                    <span class="range-value" id="sweetnessValue">5</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="overall_appeal">Overall Appeal * (1-10)</label>
+                    <input type="range" id="overall_appeal" name="overall_appeal" min="1" max="10" value="5" oninput="updateAppealValue(this.value)">
+                    <span class="range-value" id="appealValue">5</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price * ($)</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Enter your tasting notes, aromas, food pairings, etc."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Add Wine</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
